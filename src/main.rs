@@ -1,50 +1,49 @@
-use anyhow::{Context,Result};
-use hmac::{digest::FixedOutput, Hmac, Mac};
-use rayon::prelude::*;
-use ring::rand::{self};
-use sha2::Sha256;
-use std::ops::BitXor;
+use anyhow::Result;
 use crypto_bigint::U256;
+
+use rayon::prelude::*;
+use ring::rand;
+use std::ops::BitXor;
 use test_pal_hash::mock_generate_int;
-// Create alias for HMAC-SHA256
-type HmacSha256 = Hmac<Sha256>;
 fn main() -> Result<()> {
     let _generator = rand::SystemRandom::new();
-    let  key = b"my secret and secure key";
+    let _key = b"my secret and secure key";
     // generator.fill(&mut key).unwrap();
 
-    
     let mock_data = mock_generate_int::<20>(100000);
-   
-
     let result = mock_data
         .par_iter()
         .flat_map(|msgs| {
-            msgs.par_iter().map(|msg| {
-                let mut mac = HmacSha256::new_from_slice(key)
-                .with_context(|| "HMAC can take key of any size").unwrap();
-                mac.update(&msg.to_be_bytes());
-                mac.finalize_fixed()
-            })
-        //     .fold(
-        //         || U256::default(),
-        //         |a, b| {
-                    
-        //             let b = U256::from_be_slice(&b);
-        //             a.bitxor(&b)
-        //         }
-        // )
-        // .reduce(||U256::default(),|a,b|a.bitxor(&b))
+            // let style = ProgressStyle::with_template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}").unwrap();
+            msgs.par_iter()
+                // .progress_count(mock_data.len() as u64)
+                // .progress_with_style(style)
+                .map(|msg| {
+                    let mut hasher = blake3::Hasher::new();
+                    let mut mac_reader = hasher.update(&msg.to_be_bytes()).finalize_xof();
+                    let mut mac = [0; 32];
+                    mac_reader.fill(&mut mac);
+                    // .with_context(|| "HMAC can take key of any size").unwrap();
+                    mac
+                })
+            //     .fold(
+            //         || U256::default(),
+            //         |a, b| {
+
+            //             let b = U256::from_be_slice(&b);
+            //             a.bitxor(&b)
+            //         }
+            // )
+            // .reduce(||U256::default(),|a,b|a.bitxor(&b))
         })
         .fold(
-                || U256::default(),
-                |a, b| {
-                    
-                    let b = U256::from_be_slice(&b);
-                    a.bitxor(&b)
-                }
+            || U256::default(),
+            |a, b| {
+                let b = U256::from_be_slice(&b);
+                a.bitxor(&b)
+            },
         )
-        .reduce(||U256::default(),|a,b|a.bitxor(&b));
+        .reduce(|| U256::default(), |a, b| a.bitxor(&b));
     println!("{result}");
     Ok(())
 }

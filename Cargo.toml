@@ -9,35 +9,50 @@ edition = "2021"
 anyhow = "1.0.66"
 crypto-bigint = "0.4.9"
 fixedbitset = "0.4.2"
-hmac = "0.12.1"
-rayon = "1.5.3"
+rayon = "1.6.0"
 ring = "0.17.0-alpha.11"
-sha2 = {version="0.10.6",features = ["asm"]}
+sha2 = { version = "0.10.6", features = ["asm"] }
 rand = "0.8.5"
 hex = "0.4.3"
+blake3 = { version = "1.3.2" }
+indicatif = { version = "0.17.2", features = ["improved_unicode", "rayon"] }
 
 [dev-dependencies]
 hex-literal = "0.3.4"
 criterion = { version = "0.4.0", features = ['real_blackbox', "html_reports"] }
+hmac = "0.12.1"
 
 [[bench]]
-name = "par_or_seq_hmac"
+name = "par_hash_sha256"
 harness = false
 
 [[bench]]
-name = "par_hmac"
+name = "seq_hash_sha256"
 harness = false
 
 [[bench]]
-name = "seq_hmac"
+name = "par_hash_blake3"
+harness = false
+
+[[bench]]
+name = "seq_hash_blake3"
+harness = false
+
+[[bench]]
+name = "par_and_seq_hash_blake3"
+harness = false
+
+
+[[bench]]
+name = "par_and_seq_hash_sha256"
 harness = false
 
 [profile.bench]
 debug = true
-lto=true
+lto = true
 codegen-units = 1
 
 [profile.release]
-debug=true
-lto=true
+debug = true
+lto = true
 codegen-units = 1

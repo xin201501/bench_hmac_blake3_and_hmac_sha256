@@ -1,23 +1,19 @@
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use crypto_bigint::U256;
-use hmac::{digest::FixedOutput, Hmac, Mac};
 use rayon::prelude::*;
-use sha2::Sha256;
+use sha2::{Digest, Sha256};
 use test_pal_hash::mock_generate_int;
-type HmacSha256 = Hmac<Sha256>;
-fn pal_hmac_benchmark(c: &mut Criterion) {
-    let mock_data = mock_generate_int::<20>(4096);
-   
-    c.bench_function("parralel HMAC bench", |b| {
+fn pal_sha256_benchmark(c: &mut Criterion) {
+    let mock_data = mock_generate_int::<20>(100000);
+    c.bench_function("Parralel sha256 hash bench", |b| {
         b.iter(|| {
-            let key = b"my secret and secure key";
             let result = mock_data
                 .par_iter()
                 .flat_map(|msgs| {
                     msgs.par_iter().map(|msg| {
-                        let mut mac = HmacSha256::new_from_slice(key).unwrap();
+                        let mut mac = Sha256::new();
                         mac.update(&msg.to_be_bytes());
-                        mac.finalize_fixed()
+                        mac.finalize()
                     })
                 })
                 .fold(
@@ -32,5 +28,5 @@ fn pal_hmac_benchmark(c: &mut Criterion) {
         })
     });
 }
-criterion_group!(benches, pal_hmac_benchmark);
+criterion_group!(benches, pal_sha256_benchmark);
 criterion_main!(benches);
