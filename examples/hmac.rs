@@ -1,3 +1,5 @@
+//！与[hmac]官方文档 https://docs.rs/hmac/0.12.1/hmac 基本一致
+
 use hex_literal::hex;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;

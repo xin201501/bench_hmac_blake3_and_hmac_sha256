@@ -1,3 +1,4 @@
+//！参考[hmac]官方文档 https://docs.rs/hmac/0.12.1/hmac
 use crypto_bigint::U256;
 use hmac::{digest::FixedOutput, Hmac, Mac};
 use sha2::Sha256;
