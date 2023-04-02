@@ -14,8 +14,14 @@ cargo bench
 ## 如何运行`hmac-sha256`示例
 
 ```sh
-cargo run --example
+cargo run --example <想要运行的例子>
 ```
+
+## 定义的例子列表
+
+- `hmac`
+- `par_hmac_string_1_to_4_xor`
+- `seq_hmac_string_1_to_4_xor`
 
 ## 所有定义的benchmark的列表
 
